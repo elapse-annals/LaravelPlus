@@ -1,0 +1,33 @@
+language: php
+
+matrix:
+  fast_finish: true
+  include:
+    - php: 7.2
+    - php: 7.3
+    - php: 7.4
+
+cache:
+  directories:
+    - $HOME/.composer/cache
+
+services:
+  - mysql
+
+service:
+  - memcached
+  - mysql
+  - redis-server
+
+before_script:
+  - cp .env.travis .env
+  - composer global require hirak/prestissimo
+  - composer install
+  - composer dump-autoload
+  - php artisan key:generate
+  - php artisan vendor:publish --tag=0
+  - mysql -e 'CREATE DATABASE IF NOT EXISTS laravel_plus;'
+  - php artisan migrate
+
+script:
+  - vendor/bin/phpunit
